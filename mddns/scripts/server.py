@@ -13,5 +13,5 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     config = SafeConfigParser()
-    config.read(args.config)
+    config.readfp(args.config)
     runserver(config)

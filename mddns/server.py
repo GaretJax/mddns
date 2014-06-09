@@ -49,10 +49,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 class Updater:
-    def __init__(self, ip_filepath, token_filepath, endpoint):
-        self.ip_filepath = ip_filepath
-        self.token_filepath = token_filepath
-        self.endpoint = endpoint
+    def __init__(self, config):
+        self.ip_filepath = config.get('checker', 'ip_file')
+        self.token_filepath = config.get('checker', 'token_file')
+        self.endpoint = config.get('server', 'public_endpoint')
+        self.config = config
 
     def update_ip(self, ip):
         with open(self.ip_filepath, 'wb') as fh:
@@ -80,13 +81,16 @@ class Updater:
         )
 
         msg['Subject'] = 'Please update your IP address'
-        msg['From'] = 'telecamera@stoppaniarch.ch'
-        msg['To'] = 'jonathan.stoppani@gmail.com'
+        msg['From'] = self.config.get('email', 'from_email')
+        msg['To'] = self.config.get('email', 'to_email')
 
         print('sending email')
 
-        s = smtplib.SMTP_SSL('smtp.webfaction.com')
-        s.login('user', 'password')
+        s = smtplib.SMTP_SSL(self.config.get('email', 'smtp_server'))
+        s.login(
+            self.config.get('email', 'smtp_user'),
+            self.config.get('email', 'smtp_password')
+        )
         s.send_message(msg)
         s.quit()
 
@@ -124,10 +128,14 @@ class Updater:
             print('Forcing exit!')
 
 
-def runserver(address, ip_file, token_file, interval, endpoint):
+def runserver(config):
+    address = (
+        config.get('server', 'interface'),
+        config.getint('server', 'port')
+    )
     httpd = HTTPServer(address, Handler)
-    httpd.updater = Updater(ip_file, token_file, endpoint)
-    httpd.updater.start_checking(interval)
+    httpd.updater = Updater(config)
+    httpd.updater.start_checking(config.getint('checker', 'interval'))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

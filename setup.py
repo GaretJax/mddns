@@ -54,7 +54,7 @@ class Setup(object):
     def version():
         data = Setup.read(os.path.join('mddns',
                                        '__init__.py'))
-        version = (re.search(u"__version__\s*=\s*u?'([^']+)'", data)
+        version = (re.search("__version__\s*=\s*u?'([^']+)'", data)
                    .group(1).strip())
         return version
 
@@ -62,7 +62,7 @@ class Setup(object):
     def url():
         data = Setup.read(os.path.join('mddns',
                                        '__init__.py'))
-        version = (re.search(u"__url__\s*=\s*u?'([^']+)'", data)
+        version = (re.search("__url__\s*=\s*u?'([^']+)'", data)
                    .group(1).strip())
         return version
 
